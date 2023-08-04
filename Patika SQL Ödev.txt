@@ -1,0 +1,109 @@
+
+
+CREATE TABLE country (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE league (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  id_country INT NOT NULL,
+  FOREIGN KEY (id_country) REFERENCES country (id)
+);
+
+CREATE TABLE team (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  id_league INT NOT NULL,
+  founding_year INT NOT NULL,
+  goals_scored INT NOT NULL,
+  goals_conceded INT NOT NULL,
+  points INT NOT NULL,
+  level INT NOT NULL,
+  FOREIGN KEY (id_league) REFERENCES league (id)
+);
+
+CREATE TABLE player (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  surname VARCHAR(100) NOT NULL,
+  id_team INT NOT NULL,
+  id_country INT NOT NULL,
+  goals_scored INT NOT NULL,
+  FOREIGN KEY (id_team) REFERENCES team (id),
+  FOREIGN KEY (id_country) REFERENCES country (id)
+);
+
+
+
+
+
+INSERT INTO country (name) VALUES
+  ('Türkiye'),
+  ('Almanya'),
+  ('İngiltere');
+
+INSERT INTO league (name, id_country) VALUES
+  ('Süper Lig', 1),
+  ('Bundesliga', 2),
+  ('Premier League', 3);
+
+INSERT INTO team (name, id_league, founding_year, goals_scored, goals_conceded, points, level) VALUES
+  ('Galatasaray', 1, 1905, 100, 50, 50, 1),
+  ('Fenerbahçe', 1, 1907, 70, 40, 40, 1),
+  ('Beşiktaş', 1, 1903, 80, 30, 30, 1),
+  ('Bayern Münih', 2, 1900, 120, 40, 50, 1),
+  ('Dortmund', 2, 1909, 110, 30, 40, 1),
+  ('Schalke 04', 2, 1904, 90, 20, 30, 1),
+  ('Manchester City', 3, 1880, 120, 30, 40, 1),
+  ('Manchester United', 3, 1878, 110, 20, 30, 1),
+  ('Aston Villa', 3, 1874, 100, 10, 20, 1);
+
+INSERT INTO player (name, surname, id_team, id_country, goals_scored) VALUES
+  ('Mauro Icardi', 'Icardi', 1, 1, 50),
+  ('Robert Lewandowski', 'Lewandowski', 2, 2, 45),
+  ('Erling Haaland', 'Haaland', 3, 3, 40);
+
+
+
+SELECT name FROM league WHERE id_country = 1;
+
+
+SELECT name FROM team WHERE id_country = 1;
+
+
+SELECT team.name, team.goals_scored, team.goals_conceded, team.points
+FROM team
+JOIN league ON team.id_league = league.id
+WHERE league.id_country = 1 AND league.level = 1
+ORDER BY points DESC;
+
+
+SELECT league.name, AVG(team.points)
+FROM league
+JOIN team ON league.id = team.id_league
+WHERE league.id_country = 1
+GROUP BY league
+
+
+SELECT player.name, player.surname, player.team_name,player.id_country FROM player
+JOIN team ON player.id_team = team.id
+JOIN league ON team.id_league = league.id
+WHERE league.name = 'Lig Adı'
+ORDER BY goals_scored DESC;
+
+
+SELECT team.name,team.goals_scored,team.goals_conceded
+FROM team
+JOIN league ON team.id_league = league.id
+WHERE league.id_country = 1
+AND team.goals_scored < team.goals_conceded;
+
+
+SELECT team.name,team.goals_scored,
+SUM(player.goals_scored)
+FROM team
+JOIN player ON team.id = player.id_team
+GROUP BY team.name;
+
